@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <title>Choropleth Map – Covid-19 US</title>
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
-    <link href="https://api.mapbox.com/mapbox-gl-js/v2.5.0/mapbox-gl.css" rel="stylesheet">
-    <script src="https://api.mapbox.com/mapbox-gl-js/v2.5.0/mapbox-gl.js"></script>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.0.0/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.0.0/mapbox-gl.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -18,7 +18,6 @@
             width: 100%; height: 100%;
         }
 
-        /* ── Navbar ── */
         #navbar {
             position: fixed;
             top: 1rem;
@@ -48,7 +47,6 @@
         #navbar a:hover { background: #f0f0f0; color: #333; }
         #navbar a.active { background: #e05c3a; color: white; }
 
-        /* ── Hover info panel ── */
         .map-overlay {
             position: absolute;
             background: white;
@@ -74,7 +72,6 @@
         #features p { color: #666; }
         #features h3 { font-size: 0.9rem; margin-bottom: 0.2rem; }
 
-        /* ── Legend ── */
         #legend {
             bottom: 2rem;
             right: 1rem;
@@ -97,13 +94,11 @@
 
     <div id="map"></div>
 
-    <!-- Navbar -->
     <div id="navbar">
         <a href="map1.html" class="active">Choropleth Map</a>
         <a href="map2.html">Proportional Symbols Map</a>
     </div>
 
-    <!-- Hover info -->
     <div class="map-overlay" id="features">
         <h2>Covid-19 Rate</h2>
         <div id="text-description">
@@ -111,7 +106,6 @@
         </div>
     </div>
 
-    <!-- Legend -->
     <div class="map-overlay" id="legend"></div>
 
     <script>
@@ -155,7 +149,6 @@
                     }
                 });
 
-                // Build legend
                 const layers = ['0–9', '10–19', '20–49', '50–99', '100–199', '200–499', '500–999', '1000+'];
                 const colors = ['#FFEDA0','#FED976','#FEB24C','#FD8D3C','#FC4E2A','#E31A1C','#BD0026','#800026'];
 
@@ -175,7 +168,6 @@
                 });
             });
 
-            // Hover interaction
             map.on('mousemove', ({ point }) => {
                 const state = map.queryRenderedFeatures(point, { layers: ['state_data_layer'] });
                 document.getElementById('text-description').innerHTML = state.length

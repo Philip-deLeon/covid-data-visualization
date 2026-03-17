@@ -18,7 +18,6 @@
             width: 100%; height: 100%;
         }
 
-        /* ── Navbar ── */
         #navbar {
             position: fixed;
             top: 1rem;
@@ -48,7 +47,6 @@
         #navbar a:hover { background: #f0f0f0; color: #333; }
         #navbar a.active { background: #e05c3a; color: white; }
 
-        /* ── Hover info panel ── */
         .map-overlay {
             position: absolute;
             background: white;
@@ -69,7 +67,6 @@
         #features p { color: #666; }
         #features h3 { font-size: 0.9rem; margin-bottom: 0.2rem; }
 
-        /* ── Legend ── */
         #legend {
             bottom: 2rem;
             right: 1rem;
@@ -98,13 +95,11 @@
 
     <div id="map"></div>
 
-    <!-- Navbar -->
     <div id="navbar">
         <a href="map1.html">Choropleth Map</a>
         <a href="map2.html" class="active">Proportional Symbols Map</a>
     </div>
 
-    <!-- Hover info -->
     <div class="map-overlay" id="features">
         <h2>Covid-19 Rate</h2>
         <div id="text-description">
@@ -112,7 +107,6 @@
         </div>
     </div>
 
-    <!-- Legend -->
     <div class="map-overlay" id="legend">
         <b>Cases per 100k</b>
         <div class="legend-circle-row">
@@ -153,7 +147,6 @@
                     data: state_data
                 });
 
-                // Faint state fill for context
                 map.addLayer({
                     'id': 'state_borders',
                     'type': 'fill',
@@ -165,7 +158,6 @@
                     }
                 });
 
-                // Proportional circles sized by density
                 map.addLayer({
                     'id': 'state_circles',
                     'type': 'circle',
@@ -188,7 +180,6 @@
                 });
             });
 
-            // Hover interaction
             map.on('mousemove', ({ point }) => {
                 const state = map.queryRenderedFeatures(point, { layers: ['state_circles'] });
                 document.getElementById('text-description').innerHTML = state.length
@@ -196,7 +187,6 @@
                     : `<p>Hover over a circle!</p>`;
             });
 
-            // Change cursor on hover
             map.on('mouseenter', 'state_circles', () => map.getCanvas().style.cursor = 'pointer');
             map.on('mouseleave', 'state_circles', () => map.getCanvas().style.cursor = '');
         }
