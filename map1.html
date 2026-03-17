@@ -4,12 +4,11 @@
     <meta charset="utf-8">
     <title>Choropleth Map – Covid-19 US</title>
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
-    <link href="https://api.mapbox.com/mapbox-gl-js/v3.0.0/mapbox-gl.css" rel="stylesheet">
-    <script src="https://api.mapbox.com/mapbox-gl-js/v3.0.0/mapbox-gl.js"></script>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.5.0/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.5.0/mapbox-gl.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-
         body { font-family: 'Open Sans', sans-serif; }
 
         #map {
@@ -63,14 +62,35 @@
             min-width: 160px;
         }
 
-        #features h2 {
-            font-size: 0.95rem;
-            font-weight: 600;
-            margin-bottom: 0.4rem;
-        }
-
+        #features h2 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.4rem; }
         #features p { color: #666; }
         #features h3 { font-size: 0.9rem; margin-bottom: 0.2rem; }
+
+        #info {
+            bottom: 2rem;
+            left: 1rem;
+            max-width: 240px;
+        }
+
+        #info h3 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        #info p {
+            font-size: 0.78rem;
+            color: #666;
+            margin-bottom: 0.2rem;
+        }
+
+        #info .source {
+            font-size: 0.72rem;
+            color: #aaa;
+            margin-top: 0.5rem;
+            border-top: 1px solid #eee;
+            padding-top: 0.4rem;
+        }
 
         #legend {
             bottom: 2rem;
@@ -88,6 +108,21 @@
             margin-right: 6px;
             vertical-align: middle;
         }
+
+        .mapboxgl-popup-content {
+            font-family: 'Open Sans', sans-serif;
+            font-size: 0.85rem;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+        }
+
+        .mapboxgl-popup-content h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .mapboxgl-popup-content p { color: #555; }
     </style>
 </head>
 <body>
@@ -104,6 +139,13 @@
         <div id="text-description">
             <p>Hover over a state!</p>
         </div>
+    </div>
+
+    <div class="map-overlay" id="info">
+        <h3>Covid-19 Cases by State</h3>
+        <p>This map shows the Covid-19 case rate per 100,000 residents across U.S. states. Darker colors indicate higher case rates.</p>
+        <p>Intended for educational and research purposes.</p>
+        <p class="source">Data: CDC / USAFacts &nbsp;|&nbsp; GEOG 458, UW</p>
     </div>
 
     <div class="map-overlay" id="legend"></div>
@@ -173,6 +215,18 @@
                 document.getElementById('text-description').innerHTML = state.length
                     ? `<h3>${state[0].properties.name}</h3><p><strong>${state[0].properties.density}</strong> cases per 100k</p>`
                     : `<p>Hover over a state!</p>`;
+                map.getCanvas().style.cursor = state.length ? 'pointer' : '';
+            });
+
+            map.on('click', 'state_data_layer', (e) => {
+                const props = e.features[0].properties;
+                new mapboxgl.Popup()
+                    .setLngLat(e.lngLat)
+                    .setHTML(`
+                        <h3>${props.name}</h3>
+                        <p><strong>${props.density}</strong> cases per 100,000 residents</p>
+                    `)
+                    .addTo(map);
             });
         }
 

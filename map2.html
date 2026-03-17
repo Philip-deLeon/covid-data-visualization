@@ -9,7 +9,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-
         body { font-family: 'Open Sans', sans-serif; }
 
         #map {
@@ -18,6 +17,7 @@
             width: 100%; height: 100%;
         }
 
+        /* ── Navbar ── */
         #navbar {
             position: fixed;
             top: 1rem;
@@ -67,6 +67,32 @@
         #features p { color: #666; }
         #features h3 { font-size: 0.9rem; margin-bottom: 0.2rem; }
 
+        #info {
+            bottom: 2rem;
+            left: 1rem;
+            max-width: 240px;
+        }
+
+        #info h3 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        #info p {
+            font-size: 0.78rem;
+            color: #666;
+            margin-bottom: 0.2rem;
+        }
+
+        #info .source {
+            font-size: 0.72rem;
+            color: #aaa;
+            margin-top: 0.5rem;
+            border-top: 1px solid #eee;
+            padding-top: 0.4rem;
+        }
+
         #legend {
             bottom: 2rem;
             right: 1rem;
@@ -89,6 +115,21 @@
         }
 
         .legend-circle-row span { font-size: 0.82rem; color: #555; }
+
+        .mapboxgl-popup-content {
+            font-family: 'Open Sans', sans-serif;
+            font-size: 0.85rem;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+        }
+
+        .mapboxgl-popup-content h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .mapboxgl-popup-content p { color: #555; }
     </style>
 </head>
 <body>
@@ -105,6 +146,13 @@
         <div id="text-description">
             <p>Hover over a circle!</p>
         </div>
+    </div>
+
+    <div class="map-overlay" id="info">
+        <h3>Covid-19 Cases by State</h3>
+        <p>Circle size reflects the Covid-19 case rate per 100,000 residents. Larger circles indicate higher case rates.</p>
+        <p>Intended for educational and research purposes.</p>
+        <p class="source">Data: CDC / USAFacts &nbsp;|&nbsp; GEOG 458, UW</p>
     </div>
 
     <div class="map-overlay" id="legend">
@@ -189,6 +237,17 @@
 
             map.on('mouseenter', 'state_circles', () => map.getCanvas().style.cursor = 'pointer');
             map.on('mouseleave', 'state_circles', () => map.getCanvas().style.cursor = '');
+
+            map.on('click', 'state_circles', (e) => {
+                const props = e.features[0].properties;
+                new mapboxgl.Popup()
+                    .setLngLat(e.lngLat)
+                    .setHTML(`
+                        <h3>${props.name}</h3>
+                        <p><strong>${props.density}</strong> cases per 100,000 residents</p>
+                    `)
+                    .addTo(map);
+            });
         }
 
         geojsonFetch();
