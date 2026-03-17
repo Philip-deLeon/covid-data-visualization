@@ -1,46 +1,134 @@
-// choropleth map of the covid-19 rates
-
 <!DOCTYPE html>
 <html>
-
 <head>
     <meta charset="utf-8">
-    <title>Covid Data Visualization GEOG 458</title>
+    <title>Choropleth Map – Covid-19 US</title>
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
-
-    <!-- Including the Mapbox GL CSS file -->
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.5.0/mapbox-gl.css" rel="stylesheet">
-
-    <!-- Including the Mapbox GL JS file -->
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.5.0/mapbox-gl.js"></script>
-</head>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
+        body { font-family: 'Open Sans', sans-serif; }
+
+        #map {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+        }
+
+        /* ── Navbar ── */
+        #navbar {
+            position: fixed;
+            top: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 0.4rem;
+            display: flex;
+            gap: 0.4rem;
+            z-index: 10;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        #navbar a {
+            text-decoration: none;
+            color: #666;
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 0.5rem 1.25rem;
+            border-radius: 6px;
+            transition: background 0.2s, color 0.2s;
+            white-space: nowrap;
+        }
+
+        #navbar a:hover { background: #f0f0f0; color: #333; }
+        #navbar a.active { background: #e05c3a; color: white; }
+
+        /* ── Hover info panel ── */
+        .map-overlay {
+            position: absolute;
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        #features {
+            top: 1rem;
+            left: 1rem;
+            min-width: 160px;
+        }
+
+        #features h2 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+        }
+
+        #features p { color: #666; }
+        #features h3 { font-size: 0.9rem; margin-bottom: 0.2rem; }
+
+        /* ── Legend ── */
+        #legend {
+            bottom: 2rem;
+            right: 1rem;
+            line-height: 1.8;
+        }
+
+        #legend b { display: block; margin-bottom: 0.4rem; font-size: 0.85rem; }
+
+        .legend-key {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+    </style>
+</head>
 <body>
+
     <div id="map"></div>
-    <div class='map-overlay' id='features'>
-        <h2>US population density</h2>
-        <div id='text-description'>
+
+    <!-- Navbar -->
+    <div id="navbar">
+        <a href="map1.html" class="active">Choropleth Map</a>
+        <a href="map2.html">Proportional Symbols Map</a>
+    </div>
+
+    <!-- Hover info -->
+    <div class="map-overlay" id="features">
+        <h2>Covid-19 Rate</h2>
+        <div id="text-description">
             <p>Hover over a state!</p>
         </div>
     </div>
-    <div class='map-overlay' id='legend'></div>
+
+    <!-- Legend -->
+    <div class="map-overlay" id="legend"></div>
+
     <script>
-        // initialize basemmap
-        mapboxgl.accessToken =
-            'pk.eyJ1IjoicGxlb25uIiwiYSI6ImNtbXR3c2F5bDIyOWEyc29tbDd3ZXc5aWEifQ.uH6hJ7qTyG_0rnhWgexuFg';
+        mapboxgl.accessToken = 'pk.eyJ1IjoicGxlb25uIiwiYSI6ImNtbXR3c2F5bDIyOWEyc29tbDd3ZXc5aWEifQ.uH6hJ7qTyG_0rnhWgexuFg';
+
         const map = new mapboxgl.Map({
-            container: 'map', // container ID
-            style: 'mapbox://styles/mapbox/light-v10', // style URL
-            zoom: 3, // starting zoom
-            center: [-100, 40] // starting center
+            container: 'map',
+            style: 'mapbox://styles/mapbox/light-v10',
+            zoom: 3,
+            center: [-100, 40]
         });
 
-        // load data and add as layer
         async function geojsonFetch() {
             let response = await fetch('assets/state_data.geojson');
             let state_data = await response.json();
 
-            map.on('load', function loadingData() {
+            map.on('load', function () {
                 map.addSource('state_data', {
                     type: 'geojson',
                     data: state_data
@@ -52,84 +140,52 @@
                     'source': 'state_data',
                     'paint': {
                         'fill-color': [
-                            'step',
-                            ['get', 'density'],
-                            '#FFEDA0',   // stop_output_0
-                            10,          // stop_input_0
-                            '#FED976',   // stop_output_1
-                            20,          // stop_input_1
-                            '#FEB24C',   // stop_output_2
-                            50,          // stop_input_2
-                            '#FD8D3C',   // stop_output_3
-                            100,         // stop_input_3
-                            '#FC4E2A',   // stop_output_4
-                            200,         // stop_input_4
-                            '#E31A1C',   // stop_output_5
-                            500,         // stop_input_5
-                            '#BD0026',   // stop_output_6
-                            1000,        // stop_input_6
-                            "#800026"    // stop_output_7
+                            'step', ['get', 'density'],
+                            '#FFEDA0',
+                            10,  '#FED976',
+                            20,  '#FEB24C',
+                            50,  '#FD8D3C',
+                            100, '#FC4E2A',
+                            200, '#E31A1C',
+                            500, '#BD0026',
+                            1000, '#800026'
                         ],
                         'fill-outline-color': '#BBBBBB',
-                        'fill-opacity': 0.7,
+                        'fill-opacity': 0.7
                     }
                 });
 
-                const layers = [
-                    '0-9',
-                    '10-19',
-                    '20-49',
-                    '50-99',
-                    '100-199',
-                    '200-499',
-                    '500-999',
-                    '1000 and more'
-                ];
-                const colors = [
-                    '#FFEDA070',
-                    '#FED97670',
-                    '#FEB24C70',
-                    '#FD8D3C70',
-                    '#FC4E2A70',
-                    '#E31A1C70',
-                    '#BD002670',
-                    '#80002670'
-                ];
+                // Build legend
+                const layers = ['0–9', '10–19', '20–49', '50–99', '100–199', '200–499', '500–999', '1000+'];
+                const colors = ['#FFEDA0','#FED976','#FEB24C','#FD8D3C','#FC4E2A','#E31A1C','#BD0026','#800026'];
 
-                // create legend
                 const legend = document.getElementById('legend');
-                legend.innerHTML = "<b>Population Density<br>(people/sq.mi.)</b><br><br>";
-
+                legend.innerHTML = '<b>Cases per 100k</b>';
 
                 layers.forEach((layer, i) => {
-                    const color = colors[i];
                     const item = document.createElement('div');
                     const key = document.createElement('span');
                     key.className = 'legend-key';
-                    key.style.backgroundColor = color;
-
+                    key.style.backgroundColor = colors[i];
                     const value = document.createElement('span');
-                    value.innerHTML = `${layer}`;
+                    value.textContent = layer;
                     item.appendChild(key);
                     item.appendChild(value);
                     legend.appendChild(item);
                 });
             });
 
-            map.on('mousemove', ({point}) => {
-                const state = map.queryRenderedFeatures(point, {
-                    layers: ['state_data_layer']
-                });
-                document.getElementById('text-description').innerHTML = state.length ?
-                    `<h3>${state[0].properties.name}</h3><p><strong><em>${state[0].properties.density}</strong> people per square mile</em></p>` :
-                    `<p>Hover over a state!</p>`;
+            // Hover interaction
+            map.on('mousemove', ({ point }) => {
+                const state = map.queryRenderedFeatures(point, { layers: ['state_data_layer'] });
+                document.getElementById('text-description').innerHTML = state.length
+                    ? `<h3>${state[0].properties.name}</h3><p><strong>${state[0].properties.density}</strong> cases per 100k</p>`
+                    : `<p>Hover over a state!</p>`;
             });
         }
 
-        // Call the function to fetch GeoJSON data and load the map
         geojsonFetch();
     </script>
 
 </body>
-
 </html>
